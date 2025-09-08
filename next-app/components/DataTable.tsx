@@ -5,6 +5,7 @@ type Column = { key: string; label: string; fmt?: (v:any)=>string; isJson?: bool
 
 export default function DataTable({ apiPath, columns }: { apiPath: string; columns: Column[] }){
   const [q, setQ] = useState('')
+  const [debouncedQ, setDebouncedQ] = useState('')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [sort, setSort] = useState<string|undefined>(undefined)
@@ -13,20 +14,26 @@ export default function DataTable({ apiPath, columns }: { apiPath: string; colum
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string|undefined>(undefined)
 
-  useEffect(()=>{ fetchData() }, [q,page,pageSize,sort])
+  // debounce q to avoid firing request on every keystroke
+  useEffect(()=>{
+    const t = setTimeout(()=> setDebouncedQ(q), 300)
+    return ()=> clearTimeout(t)
+  }, [q])
+
+  useEffect(()=>{ fetchData() }, [debouncedQ,page,pageSize,sort])
 
   async function fetchData(){
     setLoading(true); setError(undefined)
     try{
-      const params = new URLSearchParams()
-      params.set('page', String(page))
-      params.set('pageSize', String(pageSize))
-      if (q) params.set('q', q)
-      if (sort) params.set('sort', sort)
+  const params = new URLSearchParams()
+  params.set('page', String(page))
+  params.set('pageSize', String(pageSize))
+  if (debouncedQ) params.set('q', debouncedQ)
+  if (sort) params.set('sort', sort)
 
       const res = await fetch(`${apiPath}?${params.toString()}`)
       if (!res.ok) throw new Error('bad')
-      const data = await res.json()
+  const data = await res.json()
       setRows(data.rows || [])
       setTotal(data.total || 0)
     }catch(e:any){
@@ -42,6 +49,12 @@ export default function DataTable({ apiPath, columns }: { apiPath: string; colum
 
   return (
     <div>
+      {/* summary of tickers (ações) */}
+      {rows.length>0 && (
+        <div style={{marginBottom:8}}>
+          <strong>Ações:</strong> {rows.map(r=>r.ticker).filter(Boolean).slice(0,20).join(', ')}{rows.length>20? '...':''}
+        </div>
+      )}
       <div className="controls">
   <input placeholder="Buscar ticker" value={q} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>{ setQ(e.target.value); setPage(1) }} />
   <select value={pageSize} onChange={(e: React.ChangeEvent<HTMLSelectElement>)=>{ setPageSize(Number(e.target.value)); setPage(1) }}>
@@ -79,7 +92,9 @@ export default function DataTable({ apiPath, columns }: { apiPath: string; colum
               <tr key={i}>
                 {columns.map(c=> (
                   <td key={c.key}>
-                    {c.isJson ? <JsonCell value={r[c.key]} /> : (c.fmt? c.fmt(r[c.key]) : String(r[c.key] ?? ''))}
+                    {c.isJson ? <JsonCell value={r[c.key]} /> : (
+                      c.key === 'ticker' ? <strong>{String(r[c.key] ?? '')}</strong> : (c.fmt? c.fmt(r[c.key]) : String(r[c.key] ?? ''))
+                    )}
                   </td>
                 ))}
               </tr>

@@ -1,35 +1,25 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import React from 'react'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div className="App" style={{padding:20,fontFamily:'Arial, sans-serif'}}>
+      <h1>Magic Formula — Front (dev)</h1>
+      <p>Este repositório contém um app Vite (este) e um app Next.js em <code>next-app</code>. Para a UI completa rode o Next app:</p>
+      <ol>
+        <li>cd next-app</li>
+        <li>npm install</li>
+        <li>npm run dev (vai abrir em http://localhost:3000)</li>
+      </ol>
+
+      <p>APIs (quando o Next estiver rodando):</p>
+      <ul>
+        <li><a href="http://localhost:3000/api/checklist" target="_blank" rel="noreferrer">/api/checklist</a></li>
+        <li><a href="http://localhost:3000/api/statusinvest/latest" target="_blank" rel="noreferrer">/api/statusinvest/latest</a></li>
+        <li><a href="http://localhost:3000/api/statusinvest/i10_ranking" target="_blank" rel="noreferrer">/api/statusinvest/i10_ranking</a></li>
+      </ul>
+
+      <p>Se preferir, eu posso migrar a UI do Next para este projeto Vite ou integrar chamadas diretas ao banco aqui — diga qual opção prefere.</p>
+    </div>
   )
 }
-
-export default App
